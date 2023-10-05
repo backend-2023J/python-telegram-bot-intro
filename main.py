@@ -1,14 +1,31 @@
-import telegram
-import os 
+from telegram import Update
+from telegram.ext import (
+    CallbackContext, 
+    Updater, 
+    CommandHandler, 
+    MessageHandler,
+    Filters
+    )
+import os
 
 TOKEN=os.environ['TOKEN']
 
-bot = telegram.Bot(token=TOKEN)
+def start(update: Update, context: CallbackContext):
+    bot = context.bot
+    chat_id = update.message.chat.id
 
-update = bot.getUpdates()
+    bot.sendMessage(chat_id, "Welcome to Bot!")
 
-chat_id = update[-1].message.chat.id
-text = update[-1].message.text
-print(chat_id, text)
+def echo(update: Update, context: CallbackContext):
+    bot = context.bot
+    text = update.message.text
+    chat_id = update.message.chat.id
 
-bot.sendMessage(chat_id=chat_id, text=text)
+    bot.sendMessage(chat_id, text)
+
+updater = Updater(token=TOKEN)
+updater.dispatcher.add_handler(CommandHandler("start", start))
+updater.dispatcher.add_handler(MessageHandler(Filters.text, echo))
+
+updater.start_polling()
+updater.idle()
